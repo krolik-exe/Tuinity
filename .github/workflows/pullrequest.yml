@@ -1,6 +1,6 @@
-name: Build main
+name: Build PR
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build:
