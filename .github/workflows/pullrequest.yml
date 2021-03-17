@@ -1,0 +1,60 @@
+name: Build main
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java: [11, 8]
+
+    steps:
+    - uses: actions/checkout@v2.1.0
+    
+    - name: Get PR info
+      run: echo ::set-env name=PR::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v1.3.0
+      with:
+        java-version: ${{ matrix.java }}
+        
+    - name: Pull Gradle Cache
+      uses: actions/cache@v2
+      id: gradle-cache
+      with:
+        path: ~/.gradle
+        key: ${{ runner.os }}-maven-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-java-${{ matrix.java }}
+
+    - name: Setup workspace
+      run: |
+        git config --global user.email "ci@github.com"
+        git config --global user.name "Github CI"
+        git submodule update --init --recursive
+        sudo chmod -R -f 777 ./gradlew
+        ./gradlew initGitSubmodules
+        
+    - name: Apply Patches
+      run: |
+        ./gradlew setupUpstream
+        ./gradlew applyPatches
+        
+    - name: Pull Maven Cache
+      uses: actions/cache@v2
+      id: maven-cache
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-
+        
+    - name: Build Tuinity Paperclip
+      run: |
+        ./gradlew clean build paperclip
+        
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Tuinity-JDK${{ matrix.java }}
+        path: tuinity-paperclip.jar
