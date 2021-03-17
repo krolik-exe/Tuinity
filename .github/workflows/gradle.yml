@@ -32,7 +32,7 @@ jobs:
         git config --global user.email "ci@github.com"
         git config --global user.name "Github CI"
         git config --global gc.auto 0
-        sudo chmod +x ./gradlew
+        sudo chmod -R -f 777 ./gradlew
         ./gradlew initGitSubmodules
         
     - name: Apply Patches
