@@ -6,6 +6,8 @@ mc-dev
 testserver
 run
 current-paper
+*clip.jar
+tuinity-launcher.jar
 
 # Compiled class file
 *.class
@@ -29,8 +31,7 @@ out/
 # Maven
 target/
 
-# Package Files #
-*.jar
+# Package Files 
 *.war
 *.nar
 *.ear
