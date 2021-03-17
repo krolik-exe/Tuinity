@@ -33,7 +33,10 @@ jobs:
         git config --global user.email "you@example.com"
         git config --global user.name "Your Name"
         git submodule update --init --recursive
-        ./tuinity jar
+        ./gradlew initGitSubmodules
+        ./gradlew setupUpstream
+        ./gradlew applyPatches
+        ./gradlew paperclip
         
     - uses: actions/upload-artifact@v2
       with:
