@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         java: [11, 8]
+      fail-fast: false
 
     steps:
     - uses: actions/checkout@v2.1.0
@@ -30,9 +31,8 @@ jobs:
       run: |
         git config --global user.email "ci@github.com"
         git config --global user.name "Github CI"
-        git submodule update --init --recursive
-        sudo chmod -R -f 777 ./gradlew
-        ./gradlew initGitSubmodules
+        git config --global gc.auto 0
+        sudo chmod +x ./gradlew
         
     - name: Apply Patches
       run: |
