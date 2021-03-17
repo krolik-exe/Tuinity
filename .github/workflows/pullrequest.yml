@@ -1,6 +1,6 @@
-name: Build PR
+name: Build main
 
-on: [pull_request]
+on: [push]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2.1.0
-
+    
     - name: Get PR info
       run: echo ::set-env name=PR::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
 
@@ -21,24 +21,40 @@ jobs:
       uses: actions/setup-java@v1.3.0
       with:
         java-version: ${{ matrix.java }}
+        
+    - name: Pull Gradle Cache
+      uses: actions/cache@v2
+      id: gradle-cache
+      with:
+        path: ~/.gradle
+        key: ${{ runner.os }}-maven-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-java-${{ matrix.java }}
 
-    - uses: actions/cache@v1.1.2
+    - name: Setup workspace
+      run: |
+        git config --global user.email "ci@github.com"
+        git config --global user.name "Github CI"
+        git submodule update --init --recursive
+        sudo chmod -R -f 777 ./gradlew
+        ./gradlew initGitSubmodules
+        
+    - name: Apply Patches
+      run: |
+        ./gradlew setupUpstream
+        ./gradlew applyPatches
+        
+    - name: Pull Maven Cache
+      uses: actions/cache@v2
+      id: maven-cache
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-
-
-    - name: Patch Tuinity
+        
+    - name: Build Tuinity Paperclip
       run: |
-        git config --global user.email "you@example.com"
-        git config --global user.name "Your Name"
-        git submodule update --init --recursive
-        ./gradlew initGitSubmodules
-        ./gradlew setupUpstream
-        ./gradlew applyPatches
-        ./gradlew paperclip
+        ./gradlew clean build paperclip
         
     - uses: actions/upload-artifact@v2
       with:
-        name: Tuinity-PR${{ env.PR }}-JDK${{ matrix.java }}
+        name: Tuinity-JDK${{ matrix.java }}
         path: tuinity-paperclip.jar
