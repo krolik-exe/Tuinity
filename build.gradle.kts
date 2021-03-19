@@ -4,6 +4,7 @@ import xyz.jpenilla.toothpick.toothpick
 plugins {
     `java-library`
     id("xyz.jpenilla.toothpick") version "1.0.0-SNAPSHOT"
+    maven
 }
 
 toothpick {
@@ -16,7 +17,7 @@ toothpick {
 
     minecraftVersion = "1.16.5"
     nmsPackage = "1_16_R3"
-    nmsRevision = "R0.1-SNAPSHOT"
+    nmsRevision = "R0.2-SNAPSHOT"
 
     upstream = "Paper"
     upstreamBranch = "origin/master"
